@@ -31,13 +31,12 @@ class SeectionSplitter(bpy.types.Operator):
         items_x = {}
         items_y = {}
         items_z = {}
-        for obj in bpy.data.objects.items():
-            if bpy.data.objects[obj[0]].select:
-                name = bpy.data.objects[obj[0]].name
-                items.append(name)
-                items_x['"' + str(name) + '"'] = bpy.data.objects[obj[0]].location[0]
-                items_y['"' + str(name) + '"'] = bpy.data.objects[obj[0]].location[1]
-                items_z['"' + str(name) + '"'] = bpy.data.objects[obj[0]].location[2]
+        for obj in bpy.context.selected_objects:
+            if obj.select and context.scene.selection_splitter_id_key in obj.name:
+                items.append(obj.name)
+                items_x['"' + str(obj.name) + '"'] = obj.location[0]
+                items_y['"' + str(obj.name) + '"'] = obj.location[1]
+                items_z['"' + str(obj.name) + '"'] = obj.location[2]
         items.sort()
         items = ['"' + str(item) + '"' for item in items]
         x_asc = [k for k, v in sorted(items_x.items(), key=lambda x:x[1])]
@@ -51,10 +50,14 @@ class SeectionSplitter(bpy.types.Operator):
 
     def draw(self, context):
         col = self.layout.column(align=True)
+        col.prop(context.scene, "selection_splitter_id_key")
         col.prop(context.scene, "selection_splitter_id_asc")
         col.prop(context.scene, "selection_splitter_x_asc")
         col.prop(context.scene, "selection_splitter_y_asc")
         col.prop(context.scene, "selection_splitter_z_asc")
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
 
 
 def menu_func(self, context):
@@ -90,27 +93,32 @@ def unregister_shortcut():
 def register():
     unregister_shortcut()
     bpy.utils.register_module(__name__)
+    bpy.types.Scene.selection_splitter_id_key = bpy.props.StringProperty(
+        name="id key",
+        description="select object only which has this key in its name.",
+        default="")
     bpy.types.Scene.selection_splitter_id_asc = bpy.props.StringProperty(
         name="id asc",
         description="id in group",
-        default="default")
+        default="for output only")
     bpy.types.Scene.selection_splitter_x_asc = bpy.props.StringProperty(
         name="x asc",
         description="id in group",
-        default="default")
+        default="for output only")
     bpy.types.Scene.selection_splitter_y_asc = bpy.props.StringProperty(
         name="y asc",
         description="id in group",
-        default="default")
+        default="for output only")
     bpy.types.Scene.selection_splitter_z_asc = bpy.props.StringProperty(
         name="z asc",
         description="id in group",
-        default="default")
+        default="for output only")
     register_shortcut()
 
 
 def unregister():
     bpy.utils.unregister_module(__name__)
+    del bpy.types.Scene.selection_splitter_id_key
     del bpy.types.Scene.selection_splitter_id_asc
     del bpy.types.Scene.selection_splitter_x_asc
     del bpy.types.Scene.selection_splitter_y_asc
