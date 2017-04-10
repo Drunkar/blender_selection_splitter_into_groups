@@ -10,3 +10,7 @@ Blender add-on which split selected object into specific groups and print ids if
 3. Specify id keywords which objects you want to extract contains.
 4. Click "OK".
 5. IDs of matched objects will be printed in Panel.
+
+![call.png](https://github.com/Drunkar/blender_selection_splitter_into_groups/blob/images/call.png?raw=true)
+
+![result.png](https://github.com/Drunkar/blender_selection_splitter_into_groups/blob/images/result.png?raw=true)
