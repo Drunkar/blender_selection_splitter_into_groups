@@ -1,10 +1,11 @@
+import re
 import bpy
 from bpy.props import StringProperty
 
 bl_info = {
     "name": "selection splitter into groups",
     "author": "Drunkar",
-    "version": (0, 1),
+    "version": (0, 2),
     "blender": (2, 7, 8),
     "location": "3D View, Ctrl + Alt + S",
     "description": "Split select object into specific groups and print ids.",
@@ -32,11 +33,12 @@ class SeectionSplitter(bpy.types.Operator):
         items_y = {}
         items_z = {}
         for obj in bpy.context.selected_objects:
-            if obj.select and context.scene.selection_splitter_id_key in obj.name:
-                items.append(obj.name)
-                items_x['"' + str(obj.name) + '"'] = obj.location[0]
-                items_y['"' + str(obj.name) + '"'] = obj.location[1]
-                items_z['"' + str(obj.name) + '"'] = obj.location[2]
+            matched = re.search(context.scene.selection_splitter_id_key, obj.name)
+            if obj.select and matched:
+                items.append(matched.group(0))
+                items_x['"' + str(matched.group(0)) + '"'] = obj.location[0]
+                items_y['"' + str(matched.group(0)) + '"'] = obj.location[1]
+                items_z['"' + str(matched.group(0)) + '"'] = obj.location[2]
         items.sort()
         items = ['"' + str(item) + '"' for item in items]
         x_asc = [k for k, v in sorted(items_x.items(), key=lambda x:x[1])]
@@ -57,6 +59,10 @@ class SeectionSplitter(bpy.types.Operator):
         col.prop(context.scene, "selection_splitter_z_asc")
 
     def invoke(self, context, event):
+        if context.scene.selection_splitter_x_asc in vars():
+            context.scene.selection_splitter_x_asc = None
+            context.scene.selection_splitter_y_asc = None
+            context.scene.selection_splitter_z_asc = None
         return context.window_manager.invoke_props_dialog(self)
 
 
@@ -94,8 +100,8 @@ def register():
     unregister_shortcut()
     bpy.utils.register_module(__name__)
     bpy.types.Scene.selection_splitter_id_key = bpy.props.StringProperty(
-        name="id key",
-        description="select object only which has this key in its name.",
+        name="id key (regular expression)",
+        description="select object only whichmatches to this expression.",
         default="")
     bpy.types.Scene.selection_splitter_id_asc = bpy.props.StringProperty(
         name="id asc",
