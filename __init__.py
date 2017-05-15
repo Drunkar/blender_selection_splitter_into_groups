@@ -53,6 +53,14 @@ class SeectionSplitter(bpy.types.Operator):
         context.scene.selection_splitter_x_asc = ",".join(x_asc)
         context.scene.selection_splitter_y_asc = ",".join(y_asc)
         context.scene.selection_splitter_z_asc = ",".join(z_asc)
+        items.reverse()
+        x_asc.reverse()
+        y_asc.reverse()
+        z_asc.reverse()
+        context.scene.selection_splitter_id_desc = ",".join(items)
+        context.scene.selection_splitter_x_desc = ",".join(x_asc)
+        context.scene.selection_splitter_y_desc = ",".join(y_asc)
+        context.scene.selection_splitter_z_desc = ",".join(z_asc)
 
         # parent
         item_parents = [bpy.data.objects[i].parent for i in item_names if bpy.data.objects[i].parent]
@@ -76,6 +84,14 @@ class SeectionSplitter(bpy.types.Operator):
         context.scene.selection_splitter_parent_x_asc = ",".join(parent_x_asc)
         context.scene.selection_splitter_parent_y_asc = ",".join(parent_y_asc)
         context.scene.selection_splitter_parent_z_asc = ",".join(parent_z_asc)
+        item_parents.reverse()
+        parent_x_asc.reverse()
+        parent_y_asc.reverse()
+        parent_z_asc.reverse()
+        context.scene.selection_splitter_parent_id_desc = ",".join(item_parents)
+        context.scene.selection_splitter_parent_x_desc = ",".join(parent_x_asc)
+        context.scene.selection_splitter_parent_y_desc = ",".join(parent_y_asc)
+        context.scene.selection_splitter_parent_z_desc = ",".join(parent_z_asc)
 
         return {"FINISHED"}
 
@@ -86,10 +102,18 @@ class SeectionSplitter(bpy.types.Operator):
         col.prop(context.scene, "selection_splitter_x_asc")
         col.prop(context.scene, "selection_splitter_y_asc")
         col.prop(context.scene, "selection_splitter_z_asc")
+        col.prop(context.scene, "selection_splitter_id_desc")
+        col.prop(context.scene, "selection_splitter_x_desc")
+        col.prop(context.scene, "selection_splitter_y_desc")
+        col.prop(context.scene, "selection_splitter_z_desc")
         col.prop(context.scene, "selection_splitter_parent_id_asc")
         col.prop(context.scene, "selection_splitter_parent_x_asc")
         col.prop(context.scene, "selection_splitter_parent_y_asc")
         col.prop(context.scene, "selection_splitter_parent_z_asc")
+        col.prop(context.scene, "selection_splitter_parent_id_desc")
+        col.prop(context.scene, "selection_splitter_parent_x_desc")
+        col.prop(context.scene, "selection_splitter_parent_y_desc")
+        col.prop(context.scene, "selection_splitter_parent_z_desc")
 
     def invoke(self, context, event):
         if context.scene.selection_splitter_x_asc in vars():
@@ -152,6 +176,22 @@ def register():
         name="z asc",
         description="id in group",
         default="for output only")
+    bpy.types.Scene.selection_splitter_id_desc = bpy.props.StringProperty(
+        name="id desc",
+        description="id in group",
+        default="for output only")
+    bpy.types.Scene.selection_splitter_x_desc = bpy.props.StringProperty(
+        name="x desc",
+        description="id in group",
+        default="for output only")
+    bpy.types.Scene.selection_splitter_y_desc = bpy.props.StringProperty(
+        name="y desc",
+        description="id in group",
+        default="for output only")
+    bpy.types.Scene.selection_splitter_z_desc = bpy.props.StringProperty(
+        name="z asc",
+        description="id in group",
+        default="for output only")
     bpy.types.Scene.selection_splitter_parent_id_asc = bpy.props.StringProperty(
         name="parent id asc",
         description="parent id in group",
@@ -166,6 +206,22 @@ def register():
         default="for output only")
     bpy.types.Scene.selection_splitter_parent_z_asc = bpy.props.StringProperty(
         name="parent z asc",
+        description="parent id in group",
+        default="for output only")
+    bpy.types.Scene.selection_splitter_parent_id_desc = bpy.props.StringProperty(
+        name="parent id desc",
+        description="parent id in group",
+        default="for output only")
+    bpy.types.Scene.selection_splitter_parent_x_desc = bpy.props.StringProperty(
+        name="parent x desc",
+        description="parent id in group",
+        default="for output only")
+    bpy.types.Scene.selection_splitter_parent_y_desc = bpy.props.StringProperty(
+        name="parent y desc",
+        description="parent id in group",
+        default="for output only")
+    bpy.types.Scene.selection_splitter_parent_z_desc = bpy.props.StringProperty(
+        name="parent z desc",
         description="parent id in group",
         default="for output only")
     register_shortcut()
