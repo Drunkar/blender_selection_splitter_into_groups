@@ -28,13 +28,18 @@ class SeectionSplitter(bpy.types.Operator):
 
     # main
     def execute(self, context):
+        item_names = []
         items = []
         items_x = {}
         items_y = {}
         items_z = {}
+        item_parents_x = {}
+        item_parents_y = {}
+        item_parents_z = {}
         for obj in bpy.context.selected_objects:
             matched = re.search(context.scene.selection_splitter_id_key, obj.name)
             if obj.select and matched:
+                item_names.append(obj.name)
                 items.append(matched.group(0))
                 items_x['"' + str(matched.group(0)) + '"'] = obj.location[0]
                 items_y['"' + str(matched.group(0)) + '"'] = obj.location[1]
@@ -48,6 +53,30 @@ class SeectionSplitter(bpy.types.Operator):
         context.scene.selection_splitter_x_asc = ",".join(x_asc)
         context.scene.selection_splitter_y_asc = ",".join(y_asc)
         context.scene.selection_splitter_z_asc = ",".join(z_asc)
+
+        # parent
+        item_parents = [bpy.data.objects[i].parent for i in item_names if bpy.data.objects[i].parent]
+        if len(list(set(item_parents))) > 0:
+            item_parents = [i.name for i in item_parents]
+            for i, obj in enumerate(item_parents):
+                matched = re.search(context.scene.selection_splitter_id_key, item_names[i])
+                if matched:
+                    item_parents_x['"' + str(matched.group(0)) + '"'] = bpy.data.objects[obj].location[0]
+                    item_parents_y['"' + str(matched.group(0)) + '"'] = bpy.data.objects[obj].location[1]
+                    item_parents_z['"' + str(matched.group(0)) + '"'] = bpy.data.objects[obj].location[2]
+            parent_x_asc = [k for k, v in sorted(item_parents_x.items(), key=lambda x:x[1])]
+            parent_y_asc = [k for k, v in sorted(item_parents_y.items(), key=lambda x:x[1])]
+            parent_z_asc = [k for k, v in sorted(item_parents_z.items(), key=lambda x:x[1])]
+        else:
+            item_parents = []
+            parent_x_asc = []
+            parent_y_asc = []
+            parent_z_asc = []
+        context.scene.selection_splitter_parent_id_asc = ",".join(item_parents)
+        context.scene.selection_splitter_parent_x_asc = ",".join(parent_x_asc)
+        context.scene.selection_splitter_parent_y_asc = ",".join(parent_y_asc)
+        context.scene.selection_splitter_parent_z_asc = ",".join(parent_z_asc)
+
         return {"FINISHED"}
 
     def draw(self, context):
@@ -57,6 +86,10 @@ class SeectionSplitter(bpy.types.Operator):
         col.prop(context.scene, "selection_splitter_x_asc")
         col.prop(context.scene, "selection_splitter_y_asc")
         col.prop(context.scene, "selection_splitter_z_asc")
+        col.prop(context.scene, "selection_splitter_parent_id_asc")
+        col.prop(context.scene, "selection_splitter_parent_x_asc")
+        col.prop(context.scene, "selection_splitter_parent_y_asc")
+        col.prop(context.scene, "selection_splitter_parent_z_asc")
 
     def invoke(self, context, event):
         if context.scene.selection_splitter_x_asc in vars():
@@ -118,6 +151,22 @@ def register():
     bpy.types.Scene.selection_splitter_z_asc = bpy.props.StringProperty(
         name="z asc",
         description="id in group",
+        default="for output only")
+    bpy.types.Scene.selection_splitter_parent_id_asc = bpy.props.StringProperty(
+        name="parent id asc",
+        description="parent id in group",
+        default="for output only")
+    bpy.types.Scene.selection_splitter_parent_x_asc = bpy.props.StringProperty(
+        name="parent x asc",
+        description="parent id in group",
+        default="for output only")
+    bpy.types.Scene.selection_splitter_parent_y_asc = bpy.props.StringProperty(
+        name="parent y asc",
+        description="parent id in group",
+        default="for output only")
+    bpy.types.Scene.selection_splitter_parent_z_asc = bpy.props.StringProperty(
+        name="parent z asc",
+        description="parent id in group",
         default="for output only")
     register_shortcut()
 
