@@ -6,7 +6,7 @@ bl_info = {
     "name": "selection splitter into groups",
     "author": "Drunkar",
     "version": (0, 2),
-    "blender": (2, 7, 8),
+    "blender": (2, 80, 0),
     "location": "3D View, Ctrl + Alt + S",
     "description": "Split select object into specific groups and print ids.",
     "warning": "",
@@ -19,7 +19,7 @@ bl_info = {
 addon_keymaps = []
 
 
-class SeectionSplitter(bpy.types.Operator):
+class SelectionSplitter(bpy.types.Operator):
 
     bl_idname = "3dview.selection_splitter_into_groups"
     bl_label = "selection splitter into groups"
@@ -38,7 +38,7 @@ class SeectionSplitter(bpy.types.Operator):
         item_parents_z = {}
         for obj in bpy.context.selected_objects:
             matched = re.search(context.scene.selection_splitter_id_key, obj.name)
-            if obj.select and matched:
+            if obj.select_get() and matched:
                 item_names.append(obj.name)
                 items.append(matched.group(0))
                 items_x['"' + str(matched.group(0)) + '"'] = obj.location[0]
@@ -124,38 +124,39 @@ class SeectionSplitter(bpy.types.Operator):
 
 
 def menu_func(self, context):
-    self.layout.operator(SeectionSplitter.bl_idname)
+    self.layout.operator(SelectionSplitter.bl_idname)
 
 
 def register_shortcut():
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
     if kc:
-        # register shortcut in 3d view
         km = kc.keymaps.new(name="3D View", space_type="VIEW_3D")
-        # key
         kmi = km.keymap_items.new(
-            idname=SeectionSplitter.bl_idname,
+            idname=SelectionSplitter.bl_idname,
             type="S",
             value="PRESS",
             shift=False,
             ctrl=True,
             alt=True)
-        # register to shortcut key list
         addon_keymaps.append((km, kmi))
 
 
 def unregister_shortcut():
     for km, kmi in addon_keymaps:
-        # unregister shortcut key
         km.keymap_items.remove(kmi)
-    # clear shortcut key list
     addon_keymaps.clear()
+
+
+classes = (
+    SelectionSplitter,
+)
 
 
 def register():
     unregister_shortcut()
-    bpy.utils.register_module(__name__)
+    for cls in classes:
+        bpy.utils.register_class(cls)
     bpy.types.Scene.selection_splitter_id_key = bpy.props.StringProperty(
         name="id key (regular expression)",
         description="select object only whichmatches to this expression.",
@@ -189,7 +190,7 @@ def register():
         description="id in group",
         default="for output only")
     bpy.types.Scene.selection_splitter_z_desc = bpy.props.StringProperty(
-        name="z asc",
+        name="z desc",
         description="id in group",
         default="for output only")
     bpy.types.Scene.selection_splitter_parent_id_asc = bpy.props.StringProperty(
@@ -228,7 +229,8 @@ def register():
 
 
 def unregister():
-    bpy.utils.unregister_module(__name__)
+    for cls in reversed(classes):
+        bpy.utils.unregister_class(cls)
     del bpy.types.Scene.selection_splitter_id_key
     del bpy.types.Scene.selection_splitter_id_asc
     del bpy.types.Scene.selection_splitter_x_asc
