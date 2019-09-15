@@ -38,7 +38,11 @@ class SelectionSplitter(bpy.types.Operator):
         item_parents_z = {}
         for obj in bpy.context.selected_objects:
             matched = re.search(context.scene.selection_splitter_id_key, obj.name)
-            if obj.select_get() and matched:
+            if bpy.app.version < (2, 80, 0):
+                sel = obj.select
+            else:
+                sel = obj.select_get()
+            if sel and matched:
                 item_names.append(obj.name)
                 items.append(matched.group(0))
                 items_x['"' + str(matched.group(0)) + '"'] = obj.location[0]
